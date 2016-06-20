@@ -1,0 +1,796 @@
+
+<html>
+<head>
+
+<title>Kamdora</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+<script language='javascript' type='text/javascript'>
+// Global variables.
+
+var gServerIP = "192.168.1.199/";
+var gScreenWidth;
+var gScreenHeight;
+var gSystemPowerStatus;
+var gMutedAll;
+var gMuted1;
+var gVolume1;
+var gMuted2;
+var gVolume2;
+var gMuted3;
+var gVolume3;
+
+function body_load() {
+    gScreenWidth = window.innerWidth;
+    gScreenHeight = window.innerHeight;
+
+    setUiPosition(divMain, 0, 0, gScreenWidth, gScreenHeight);
+	setUiPositionCanvas(canNavBar, 0, 0, gScreenWidth, 48);
+
+	setUiPositionCanvas(canButtonOn, 0, 60, gScreenWidth / 2, 40);
+	canButtonOn.OnDraw = canButtonOnDraw;
+	addClickEvent(canButtonOn, canButtonOn_click);
+
+	setUiPositionCanvas(canButtonOff, gScreenWidth / 2, 60, gScreenWidth / 2, 40);
+	canButtonOff.OnDraw = canButtonOffDraw;
+	addClickEvent(canButtonOff, canButtonOff_click);
+	
+	setUiPositionCanvas(canButtonMuteAll, 0, 112, gScreenWidth, 40);
+	canButtonMuteAll.OnDraw = canButtonMuteAllDraw;
+	addClickEvent(canButtonMuteAll, canButtonMuteAll_click);
+	
+	setUiPositionCanvas(canButtonVolume1Up, 0, 164, gScreenWidth / 6, 40);
+	canButtonVolume1Up.OnDraw = canButtonVolume1UpDraw;
+	addClickEvent(canButtonVolume1Up, canButtonVolume1Up_click);
+	
+	setUiPositionCanvas(canButtonVolume1Down, gScreenWidth - (gScreenWidth / 6), 164, gScreenWidth / 6, 40);
+	canButtonVolume1Down.OnDraw = canButtonVolume1DownDraw;
+	addClickEvent(canButtonVolume1Down, canButtonVolume1Down_click);
+	
+	setUiPositionCanvas(canButtonMute1, gScreenWidth / 6, 164, 5 * (gScreenWidth / 6), 40);
+	canButtonMute1.OnDraw = canButtonMute1Draw;
+	addClickEvent(canButtonMute1, canButtonMute1_click);
+	
+	setUiPositionCanvas(canButtonVolume2Up, 0, 216, gScreenWidth / 6, 40);
+	canButtonVolume2Up.OnDraw = canButtonVolume2UpDraw;
+	addClickEvent(canButtonVolume2Up, canButtonVolume2Up_click);
+	
+	setUiPositionCanvas(canButtonVolume2Down, gScreenWidth - (gScreenWidth / 6), 216, gScreenWidth / 6, 40);
+	canButtonVolume2Down.OnDraw = canButtonVolume2DownDraw;
+	addClickEvent(canButtonVolume2Down, canButtonVolume2Down_click);
+	
+	setUiPositionCanvas(canButtonMute2, gScreenWidth / 6, 216, 5 * (gScreenWidth / 6), 40);
+	canButtonMute2.OnDraw = canButtonMute2Draw;
+	addClickEvent(canButtonMute2, canButtonMute2_click);
+	
+	setUiPositionCanvas(canButtonVolume3Up, 0, 268, gScreenWidth / 6, 40);
+	canButtonVolume3Up.OnDraw = canButtonVolume3UpDraw;
+	addClickEvent(canButtonVolume3Up, canButtonVolume3Up_click);
+	
+	setUiPositionCanvas(canButtonVolume3Down, gScreenWidth - (gScreenWidth / 6), 268, gScreenWidth / 6, 40);
+	canButtonVolume3Down.OnDraw = canButtonVolume3DownDraw;
+	addClickEvent(canButtonVolume3Down, canButtonVolume3Down_click);
+	
+	setUiPositionCanvas(canButtonMute3, gScreenWidth / 6, 268, 5 * (gScreenWidth / 6), 40);
+	canButtonMute3.OnDraw = canButtonMute3Draw;
+	addClickEvent(canButtonMute3, canButtonMute3_click);
+	
+    canNavBarDraw();
+	getVars();
+}
+
+function canNavBarDraw() {
+    var canvas2d = canNavBar.getContext("2d");
+
+    canvas2d.fillStyle = "#0858a8";
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "bold 22px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("Kamdora", gScreenWidth / 2, 24);
+}
+
+function canButtonOnDraw(isPressed) {
+    var canvas2d = canButtonOn.getContext("2d");
+
+    if (isPressed == true) {
+        //canvas2d.fillStyle = "#005500";
+		gSystemPowerStatus = true;
+		canButtonOffDraw(false);
+    }
+    //else {
+        //canvas2d.fillStyle = "#007700";
+    //}
+	if(gSystemPowerStatus == true){
+		canvas2d.fillStyle = "#00aa00";
+	}
+	if(gSystemPowerStatus == false){
+		canvas2d.fillStyle = "#004400";
+	}
+
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("System On", gScreenWidth / 4, 20);
+}
+
+function canButtonOn_click() {
+	var response = httpGet("?on");
+	getVars();
+}
+
+function canButtonOffDraw(isPressed) {
+    var canvas2d = canButtonOff.getContext("2d");
+
+    if (isPressed == true) {
+        //canvas2d.fillStyle = "#880000";
+		gSystemPowerStatus = false;
+		canButtonOnDraw(false);
+    }
+   // else {
+     //   canvas2d.fillStyle = "#aa0000";
+    //}
+	if(gSystemPowerStatus == false){
+		canvas2d.fillStyle = "#cc0000";
+	}
+	else{
+		canvas2d.fillStyle = "#550000";
+	}
+
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("System Off", gScreenWidth / 4, 20);
+}
+
+function canButtonOff_click() {
+	var response = httpGet("?off");
+	getVars();
+}
+
+function canButtonMuteAllDraw(isPressed) {
+    var canvas2d = canButtonMuteAll.getContext("2d");
+
+    if (isPressed == true) {
+		if(gMutedAll == false)
+		{	gMutedAll = true;
+		}
+		if(gMutedAll == true)
+			{gMutedAll = false;}
+    }
+	if(gMutedAll == true)
+	{
+		canvas2d.fillStyle = "#aa0000";
+	}
+	else
+	{
+		canvas2d.fillStyle = "#00aa00";
+		}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+	if(gMutedAll == false) {
+		canvas2d.fillText("MUTE ALL", gScreenWidth / 2, 20);
+	}
+	if(gMutedAll == true) {
+		canvas2d.fillText("MUTE ALL [MUTED]", gScreenWidth / 2, 20);
+	}
+}
+
+function canButtonMuteAll_click() {
+	var response = httpGet("?m0");
+	getVars();
+}
+
+function getVars() {
+	var values = httpGet("?getVars");
+	var varArray = values.split("*");
+	gMutedAll = varArray[1];
+	gMuted1 = varArray[2];
+	gVolume1 = varArray[3];
+	gMuted2 = varArray[4];
+	gVolume2 = varArray[5];
+	gMuted3 = varArray[6];
+	gVolume3 = varArray[7];
+	gSystemPowerStatus = varArray[14];
+	loadButtons();
+}
+
+function loadButtons()
+{
+	canButtonOnDraw(false);
+	canButtonOffDraw(false);
+	canButtonMuteAllDraw(false);
+	canButtonVolume1UpDraw(false);
+	canButtonVolume1DownDraw(false);
+	canButtonMute1Draw(false);
+	canButtonVolume2UpDraw(false);
+	canButtonVolume2DownDraw(false);
+	canButtonMute2Draw(false);
+	canButtonVolume3UpDraw(false);
+	canButtonVolume3DownDraw(false);
+	canButtonMute3Draw(false);
+}
+
+function canButtonVolume1UpDraw(isPressed) {
+    var canvas2d = canButtonVolume1Up.getContext("2d");
+
+    if (isPressed == true) {
+		canvas2d.fillStyle = "#000055";
+    }
+	if(isPressed == false) {
+		canvas2d.fillStyle = "#0000aa";
+	}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("\u2191", gScreenWidth / 12, 20);
+}
+
+function canButtonVolume1Up_click() {
+	if(gMuted1 == false) { 
+		if(gVolume1 > 1)
+		{
+			gVolume1--;
+			gVolume1--;
+		}
+		var response = httpGet("?v1" + gVolume1);
+		canButtonMute1Draw();
+	}
+	getVars();
+}
+
+function canButtonVolume1DownDraw(isPressed) {
+    var canvas2d = canButtonVolume1Down.getContext("2d");
+
+    if (isPressed == true) {
+		canvas2d.fillStyle = "#000055";
+    }
+	if(isPressed == false) {
+		canvas2d.fillStyle = "#0000aa";
+	}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("\u2193", gScreenWidth / 12, 20);
+}
+
+function canButtonVolume1Down_click() {
+	if(gMuted1 == false) {
+		if(gVolume1 < 77)
+		{
+			gVolume1++;
+			gVolume1++;
+		}
+		var response = httpGet("?v1" + gVolume1);
+		canButtonMute1Draw();
+	}
+	getVars();
+}
+
+function canButtonMute1Draw(isPressed) {
+    var canvas2d = canButtonMute1.getContext("2d");
+
+    if (isPressed == true) {
+		if(gMuted1 == false)
+		{	gMuted1 = true;}
+		if(gMuted1 == true)
+			{gMuted1 = false;}
+    }
+	if(gMuted1 == true)
+	{
+		canvas2d.fillStyle = "#aa0000";
+		}
+	if(gMuted1 == false)
+	{
+		canvas2d.fillStyle = "#00aa00";
+		}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+	if(gMuted1 == true) {
+		canvas2d.fillText("Channel 1 Mute [MUTED]", gScreenWidth / 3, 20);
+	}
+    if(gMuted1 == false) {
+		canvas2d.fillText("Channel 1 Mute [" + gVolume1 + "]", gScreenWidth / 3, 20);
+	}
+}
+
+function canButtonMute1_click() {
+	var response = httpGet("?m1");
+	getVars();
+}
+
+function canButtonVolume2UpDraw(isPressed) {
+    var canvas2d = canButtonVolume2Up.getContext("2d");
+
+    if (isPressed == true) {
+		canvas2d.fillStyle = "#000055";
+    }
+	if(isPressed == false) {
+		canvas2d.fillStyle = "#0000aa";
+	}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("\u2191", gScreenWidth / 12, 20);
+}
+
+function canButtonVolume2Up_click() {
+	if(gMuted2 == false) { 
+		if(gVolume2 > 1)
+		{
+			gVolume2--;
+			gVolume2--;
+		}
+		var response = httpGet("?v2" + gVolume2);
+		canButtonMute2Draw();
+	}
+	getVars();
+}
+
+function canButtonVolume2DownDraw(isPressed) {
+    var canvas2d = canButtonVolume2Down.getContext("2d");
+
+    if (isPressed == true) {
+		canvas2d.fillStyle = "#000055";
+    }
+	if(isPressed == false) {
+		canvas2d.fillStyle = "#0000aa";
+	}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("\u2193", gScreenWidth / 12, 20);
+}
+
+function canButtonVolume2Down_click() {
+	if(gMuted2 == false) {
+		if(gVolume2 < 77)
+		{
+			gVolume2++;
+			gVolume2++;
+		}
+		var response = httpGet("?v2" + gVolume2);
+		canButtonMute2Draw();
+	}
+	getVars();
+}
+
+function canButtonMute2Draw(isPressed) {
+    var canvas2d = canButtonMute2.getContext("2d");
+
+    if (isPressed == true) {
+		if(gMuted2 == false)
+		{	gMuted2 = true;}
+		if(gMuted2 == true)
+			{gMuted2 = false;}
+    }
+	if(gMuted2 == true)
+	{
+		canvas2d.fillStyle = "#aa0000";
+		}
+	if(gMuted2 == false)
+	{
+		canvas2d.fillStyle = "#00aa00";
+		}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+	if(gMuted2 == true) {
+		canvas2d.fillText("Channel 2 Mute [MUTED]", gScreenWidth / 3, 20);
+	}
+    if(gMuted2 == false) {
+		canvas2d.fillText("Channel 2 Mute [" + gVolume2 + "]", gScreenWidth / 3, 20);
+	}
+}
+
+function canButtonMute2_click() {
+	var response = httpGet("?m2");
+	getVars();
+}
+
+function canButtonVolume3UpDraw(isPressed) {
+    var canvas2d = canButtonVolume3Up.getContext("2d");
+
+    if (isPressed == true) {
+		canvas2d.fillStyle = "#000055";
+    }
+	if(isPressed == false) {
+		canvas2d.fillStyle = "#0000aa";
+	}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("\u2191", gScreenWidth / 12, 20);
+}
+
+function canButtonVolume3Up_click() {
+	if(gMuted3 == false) { 
+		if(gVolume3 > 1)
+		{
+			gVolume3--;
+			gVolume3--;
+		}
+		var response = httpGet("?v3" + gVolume3);
+		canButtonMute3Draw();
+	}
+	getVars();
+}
+
+function canButtonVolume3DownDraw(isPressed) {
+    var canvas2d = canButtonVolume3Down.getContext("2d");
+
+    if (isPressed == true) {
+		canvas2d.fillStyle = "#000055";
+    }
+	if(isPressed == false) {
+		canvas2d.fillStyle = "#0000aa";
+	}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+    canvas2d.fillText("\u2193", gScreenWidth / 12, 20);
+}
+
+function canButtonVolume3Down_click() {
+	if(gMuted3 == false) {
+		if(gVolume3 < 77)
+		{
+			gVolume3++;
+			gVolume3++;
+		}
+		var response = httpGet("?v3" + gVolume3);
+		canButtonMute3Draw();
+	}
+	getVars();
+}
+
+function canButtonMute3Draw(isPressed) {
+    var canvas2d = canButtonMute3.getContext("2d");
+
+    if (isPressed == true) {
+		if(gMuted3 == false)
+		{	gMuted3 = true;}
+		if(gMuted3 == true)
+			{gMuted3 = false;}
+    }
+	if(gMuted3 == true)
+	{
+		canvas2d.fillStyle = "#aa0000";
+		}
+	if(gMuted3 == false)
+	{
+		canvas2d.fillStyle = "#00aa00";
+		}
+		
+    canvas2d.fillRect(0, 0, gScreenWidth, 48);
+
+    canvas2d.fillStyle = "white";
+    canvas2d.textBaseline = "middle";
+
+    canvas2d.shadowColor = "grey";
+    canvas2d.shadowOffsetX = 1;
+    canvas2d.shadowOffsetY = 1;
+    canvas2d.shadowBlur = 1;
+
+    canvas2d.font = "20px Helvetica";
+    canvas2d.textAlign = "center";
+	if(gMuted3 == true) {
+		canvas2d.fillText("Channel 3 Mute [MUTED]", gScreenWidth / 3, 20);
+	}
+    if(gMuted3 == false) {
+		canvas2d.fillText("Channel 3 Mute [" + gVolume3 + "]", gScreenWidth / 3, 20);
+	}
+}
+
+function canButtonMute3_click() {
+	var response = httpGet("?m3");
+	getVars();
+}
+// General-purpose functions.
+
+function httpGet(cmd) {
+	
+	var url = gServerIP + cmd;
+
+	var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open("GET", url, false);
+    xmlHttp.send(null);
+ 
+    return xmlHttp.responseText;
+}
+
+function body_touchMove(event) {
+    event.preventDefault(); // Prevents elastic scrolling.
+}
+
+function isTouchDevice() {
+    return "ontouchstart" in window;
+}
+
+function addClickEvent(object, eventFunction) {
+
+    object.OnClick = eventFunction;
+
+    if (isTouchDevice() === true) {
+        object.ontouchstart = clickStartTouch;
+        object.ontouchend = clickEnd;
+    }
+    else {
+        object.onmousedown = clickStartMouse;
+        object.onmouseup = clickEnd;
+    }
+
+    object.OnDraw(false);
+
+    function clickStartTouch(event) {
+        object.OnDraw(true);
+        object.ClickX = event.touches[0].clientX;
+        object.ClickY = event.touches[0].clientY;
+    }
+
+    function clickStartMouse(event) {
+        object.OnDraw(true);
+        object.ClickX = event.clientX;
+        object.ClickY = event.clientY;
+    }
+
+    function clickEnd(event) {
+        object.OnDraw(false);
+        object.OnClick(object);
+    }
+}
+
+function addLongPressEvent(object, eventFunction) {
+
+    object.OnLongPress = eventFunction;
+
+    if (isTouchDevice() === true) {
+        object.ontouchstart = longPressStart;
+        object.ontouchmove = longPressMove;
+        object.ontouchend = longPressEnd;
+    }
+    else {
+        object.onmousedown = longPressStart;
+        object.onmousemove = longPressMove;
+        object.onmouseup = longPressEnd;
+    }
+
+    function longPressStart() {
+        object.TimeoutID = setTimeout(longPressTimeout, 1000);
+    }
+
+    function longPressMove() {
+        clearTimeout(object.TimeoutID);
+    }
+
+    function longPressEnd() {
+        clearTimeout(object.TimeoutID);
+    }
+
+    function longPressTimeout() {
+        object.OnLongPress(object);
+    }
+}
+
+function setUiPosition(object, left, top, width, height) {
+    object.style.position = "absolute";
+    object.style.left = left;
+    object.style.top = top;
+    object.style.width = width;
+    object.style.height = height;
+}
+
+function setUiPositionCanvas(object, left, top, width, height) {
+    object.width = width;
+    object.height = height;
+
+    object.style.position = "absolute";
+    object.style.left = left;
+    object.style.top = top;
+}
+
+function localStorageGet(keyName, dfltValue) {
+
+    if (localStorage.getItem(keyName) == undefined) {
+        return dfltValue;
+    }
+
+    return localStorage.getItem(keyName);
+}
+</script>
+
+<style type="text/css">
+
+body {
+    margin:0px;
+    padding:0px;
+    background:red;
+    overflow:hidden;
+    -webkit-text-size-adjust:none;
+    -webkit-user-select:none;
+    -webkit-touch-callout:none;
+}
+
+#divMain {
+    position:absolute;
+    background-color:#dddddd;
+}
+
+</style>
+
+</head>
+
+<body 
+    onload="body_load();" 
+    ontouchmove="body_touchMove(event);"
+>
+
+<div id="divMain">
+
+    <canvas id="canNavBar">
+    </canvas>
+
+    <canvas id="canButtonOn">
+    </canvas>
+
+    <canvas id="canButtonOff">
+    </canvas>
+	
+	<canvas id ="canButtonMuteAll">
+	</canvas>
+	
+	<canvas id ="canButtonMute1">
+	</canvas>
+	
+	<canvas id ="canButtonVolume1Up">
+	</canvas>
+	
+	<canvas id ="canButtonVolume1Down">
+	</canvas>
+	
+	<canvas id ="canButtonMute2">
+	</canvas>
+	
+	<canvas id ="canButtonVolume2Up">
+	</canvas>
+	
+	<canvas id ="canButtonVolume2Down">
+	</canvas>
+	
+	<canvas id ="canButtonMute3">
+	</canvas>
+	
+	<canvas id ="canButtonVolume3Up">
+	</canvas>
+	
+	<canvas id ="canButtonVolume3Down">
+	</canvas>
+	
+
+</div>
+
+</body>
+</html>
+
